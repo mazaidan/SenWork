@@ -107,10 +107,10 @@ ax2 = DATA2.plot.scatter(x='CODE_num',
 #%%
 
 # Example:
-S = 1
+S = 20
 DATA3 =  DATA2.loc[DATA2['SITE_NAME'] == SITE_NAME[S]]
-DATA3.info()
-DATA3.describe()
+Info_DATA3 = DATA3.info()
+Des_DATA3  = DATA3.describe()
 '''
 # If you wanna to make it in the same Excel sheet
 n = 0 
@@ -122,9 +122,59 @@ for s in SITE_NAME:
 # https://xlsxwriter.readthedocs.io/example_pandas_multiple.html
 '''
 
+
+fig, (ax1, ax2, ax3, ax4) = plt.subplots(4,1)
 sns.set(rc={'figure.figsize':(11, 4)})
 sns.set(font_scale=1.5, rc={'text.usetex' : False})
-ax = DATA3['PM2_5'].plot(linewidth=0.5);
-ax.set_title('PM$_{2.5}$ in ' + SITE_NAME[S])
-ax.set_ylabel('PM$_{2.5}$ [$\mu g/m^3$]')
+fig.suptitle('Aerosol Concentration in ' + SITE_NAME[S] +' Gulou district')
+
+ax1.plot(DATA3['qc_datetime'], DATA3['PM2_5'])
+
+ax1.set_ylabel('PM$_{2.5}$ [$\mu g/m^3$]')
+ax1.set_ylim(0, 2*Des_DATA3['PM2_5']['std'])
+
+ax2.plot(DATA3['qc_datetime'], DATA3['PM10'])
+ax2.set_ylabel('PM$_{10}$ [$\mu g/m^3$]')
+ax2.set_ylim(0, 2*Des_DATA3['PM10']['std'])
+
+ax3.plot(DATA3['qc_datetime'], DATA3['AQI'])
+ax3.set_ylabel('AQI')
+ax3.set_ylim(0, 3*Des_DATA3['AQI']['std'])
+
+ax4.plot(DATA3['qc_datetime'], DATA3['TSP'])
+ax4.set_ylabel('TSP')
+ax4.set_ylim(0, 3*Des_DATA3['TSP']['std'])
+
+#plt.style.use('seaborn')
+
+#%%
+
+
+fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5,1)
+sns.set(rc={'figure.figsize':(11, 4)})
+sns.set(font_scale=1.5, rc={'text.usetex' : False})
+fig.suptitle('Trace Concentration ' + SITE_NAME[S] + ' Gulou district')
+
+ax1.plot(DATA3['qc_datetime'], DATA3['SO2'])
+
+ax1.set_ylabel('SO$_{2}$ [ppb]')
+#ax1.set_ylim(0, 2*Des_DATA3['SO2']['std'])
+
+ax2.plot(DATA3['qc_datetime'], DATA3['NO2'])
+ax2.set_ylabel('NO$_{2}$ [ppb]')
+#ax2.set_ylim(0, 2*Des_DATA3['NO2']['std'])
+
+ax3.plot(DATA3['qc_datetime'], DATA3['CO'])
+ax3.set_ylabel('CO [ppb]')
+#ax3.set_ylim(0, 3*Des_DATA3['CO']['std'])
+
+ax4.plot(DATA3['qc_datetime'], DATA3['O3'])
+ax4.set_ylabel('O$_3$ [ppb]')
+ax4.set_ylim(0, 3*Des_DATA3['O3']['std'])
+
+ax5.plot(DATA3['qc_datetime'], DATA3['TVOC'])
+ax5.set_ylabel('TVOC')
+#ax5.set_ylim(0, 3*Des_DATA3['TVOC']['std'])
 plt.style.use('seaborn')
+
+
