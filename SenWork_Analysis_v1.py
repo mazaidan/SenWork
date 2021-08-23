@@ -58,129 +58,73 @@ print(pd.unique(DATA1['SITE_NAME']))
 CODE = pd.unique(DATA1['CODE'])
 SITE_NAME = pd.unique(DATA1['SITE_NAME'])
 
+
+#%% To find index DATA1['CODE'] == nan
+# https://stackoverflow.com/questions/14016247/find-integer-index-of-rows-with-nan-in-pandas-dataframe
+index = DATA1['CODE'].index[DATA1['CODE'].apply(np.isnan)]
+
 # https://stackoverflow.com/questions/21800169/python-pandas-get-index-of-rows-which-column-matches-certain-value
-L = DATA1['CODE'].index[DATA1['CODE'] == 84577].tolist()
-
-#DATA2 = DATA1.groupby("CODE")
-
+#L = DATA1['CODE'].index[DATA1['CODE'] == np.float64('nan')].tolist()
+#L = DATA1['CODE'].index[DATA1['CODE'] == CODE[74]].tolist()
 
 
+#%% Try to match between CODE and SITE_NAME
+# We need to label SITE_NAME to be something
 
-pd.isnan(DATA1['CODE'])
+DATA2 = DATA1.copy()
 
-idx_CODE_nan = DATA1['CODE'] == np.nan
 
-t = idx_CODE_nan
-[i for i, x in enumerate(t) if x]
-[4, 5, 7]
+S1 = [0] * len(DATA2) #list(range(0, len(DATA2)))
+DATA2['SITE_NAME_num'] = S1
+DATA2['CODE_num'] = S1
 
-# Other reading methods: 
-#df_SORPES = pd.read_csv('SORPES data/gas_aerosol_SORPES_2019.xlsx')
-#df_SORPES = pd.read_excel('SORPES data/gas_aerosol_SORPES_2019.xlsx')
 
-#%% To check the available variables on each sheet
-
-print('gas VOCs aerosol variables include:')
-for col in gas_VOCs_aerosol:
-    print(col)
-
-print('Particle Number Size Distribution (PNSD) include:')    
-for col in PNSD:
-    print(col)
-
-print('SA HOM include:')    
-for col in SA_HOM:
-    print(col)      
+n = 0 
+for s in SITE_NAME: #DATA2:
+    n = n+1
+    print(n)
+    print(s)
+    index = DATA2['SITE_NAME'] == s
+    DATA2['SITE_NAME_num'][index] = n
     
-#%% Download Vaisala (installed in SORPES)
-Vaisala1 = pd.read_csv('clean_vaisala_data2/P1720668.csv') # Ngaco (in Tower)
-Vaisala2 = pd.read_csv('clean_vaisala_data2/P1720669.csv')  # SORPES 
+n = 0 
+for s in CODE: 
+    n = n+1
+    print(n)
+    print(s)
+    index = DATA2['CODE'] == s
+    DATA2['CODE_num'][index] = n
+
+ax1 = DATA2.plot.scatter(x='CODE',
+                       y='SITE_NAME',
+                       c='DarkBlue')
+
+ax2 = DATA2.plot.scatter(x='CODE_num',
+                       y='SITE_NAME_num',
+                       c='DarkBlue')
 
 
-#print(Vaisala1.dtypes)
-#print(Vaisala2.dtypes) 
-# Give detailed information of Vaisala data
-Vaisala1.info()
-Vaisala2.info()
+#%%
 
-
-# From the above informaiton, many data contain 'object", we need
-# to change them all to float64, except for col "Time", 
-# So, we collect all columns names, except "Time"
-cols = Vaisala2.columns.drop('Time') # This is better
-
-# Next, we use the "cols" names, to make them 'float'
-# Replace blank value with nan and now everything becomes float number
-# https://www.geeksforgeeks.org/python-pandas-to_numeric-method/
-Vaisala2[cols] = Vaisala2[cols].apply(pd.to_numeric, errors='coerce')
-print(Vaisala2.dtypes) 
-
-# Do the same for df1
-cols = Vaisala1.columns.drop('Time') 
-Vaisala1[cols] = Vaisala1[cols].apply(pd.to_numeric, errors='coerce')
-print(Vaisala1.dtypes) 
-
-
-
-
-# We select only relevant SORPES data 
-SORPES1 = gas_VOCs_aerosol.iloc[:,0:9]
-
-SORPES1.info()
-Vaisala2.info()
-Summary_SORPES1 = SORPES1.describe()
-Summary_Vaisala2 = Vaisala2.describe()
-
-
-#%% Sync data: SORPES-Vaisala dataframe merging:
+# Example:
+S = 1
+DATA3 =  DATA2.loc[DATA2['SITE_NAME'] == SITE_NAME[S]]
+DATA3.info()
+DATA3.describe()
+'''
+# If you wanna to make it in the same Excel sheet
+n = 0 
+for s in SITE_NAME: 
+    n = n+1
+    print(n)
+    print(s)
     
-# https://www.earthdatascience.org/courses/use-data-open-source-python/use-time-series-data-in-python/date-time-types-in-pandas-python/resample-time-series-data-pandas-python/ 
-# https://stackoverflow.com/questions/27080542/merging-combining-two-dataframes-with-different-frequency-time-series-indexes-in
-
-
-
-# Convert timezone
-# https://stackoverflow.com/questions/25653529/converting-timezones-from-pandas-timestamps
-
-# Resample
-# https://stackoverflow.com/questions/57703538/typeerror-only-valid-with-datetimeindex-timedeltaindex-or-periodindex-but-got
-
-
-# To allow resample, convert column date to datetimes:
-# https://stackoverflow.com/questions/57703538/typeerror-only-valid-with-datetimeindex-timedeltaindex-or-periodindex-but-got    
-Vaisala1['Time'] = pd.to_datetime(Vaisala1['Time'])
-# set the datetime as index:
-Vaisala1 = Vaisala1.set_index('Time')
-# Convert the timezone:
-Vaisala1a = Vaisala1.tz_convert('Asia/Shanghai') 
-# resample
-Vaisala1b = Vaisala1a.resample('1H').mean()
-
-
-# To allow resample, convert column date to datetimes:
-# https://stackoverflow.com/questions/57703538/typeerror-only-valid-with-datetimeindex-timedeltaindex-or-periodindex-but-got    
-Vaisala2['Time'] = pd.to_datetime(Vaisala2['Time'])
-# set the datetime as index:
-Vaisala2 = Vaisala2.set_index('Time')
-# Convert the timezone:
-Vaisala2a = Vaisala2.tz_convert('Asia/Shanghai') 
-# resample
-Vaisala2b = Vaisala2a.resample('1H').mean()
-
-
-# To allow resample, convert column date to datetimes:
-SORPES1['Dt'] = pd.to_datetime(SORPES1['Dt'])
-# set the datetime as index:
-SORPES1 = SORPES1.set_index('Dt') 
-# Insert the timezone
-SORPES1a = SORPES1.tz_localize('Asia/Shanghai')
-# resample the timezone
-SORPES1b = SORPES1a.resample('1H').mean()
+# https://xlsxwriter.readthedocs.io/example_pandas_multiple.html
+'''
 
 sns.set(rc={'figure.figsize':(11, 4)})
 sns.set(font_scale=1.5, rc={'text.usetex' : False})
-ax = SORPES1b['PM2.5（μg/m3）'].plot(linewidth=0.5);
-Vaisala2b['PM25'].plot(linewidth=0.5);
-ax.set_title('To observe PM$_{2.5}$ before merging the data of Vaisala-SORPES')
+ax = DATA3['PM2_5'].plot(linewidth=0.5);
+ax.set_title('PM$_{2.5}$ in ' + SITE_NAME[S])
 ax.set_ylabel('PM$_{2.5}$ [$\mu g/m^3$]')
 plt.style.use('seaborn')
