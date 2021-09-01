@@ -58,7 +58,7 @@ geobasemap colorterrain
 %geobasemap darkwater
 set(findall(fig,'-property','FontSize'),'FontSize',20);
 
-% O3
+% O3 
 figure(5); fig=gcf;
 gb = geobubble(AQ,'lat','lon', ...
         'SizeVariable','O3','ColorVariable','Type');    
